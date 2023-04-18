@@ -5,21 +5,48 @@ const cors = require('cors');
 const csurf = require('csurf');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-const {environment} = require('./config');
-const isProduction = environment === 'production';
 const routes = require('./routes');
+
+const { environment } = require('./config');
 const { ValidationError } = require('sequelize');
 
 const app = express();
 
+const isProduction = environment === 'production';
+
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(express.json());
+
+// Security Middleware
+if (!isProduction) {
+    // enable cors only in development
+    app.use(cors());
+  }
+  
+  // helmet helps set a variety of headers to better secure your app
+  app.use(
+    helmet.crossOriginResourcePolicy({
+      policy: "cross-origin"
+    })
+  );
+  
+  // Set the _csrf token and create req.csrfToken method
+  app.use(
+    csurf({
+      cookie: {
+        secure: isProduction,
+        sameSite: isProduction && "Lax",
+        httpOnly: true
+      }
+    })
+  );
+
 app.use(routes);
 
 //catch unhandled requests and forward to error handler.
 app.use((_req, _res, next) => {
-    const err = new Error("Thre requseted resource couldn't be found.");
+    const err = new Error("The requseted resource couldn't be found.");
     err.title = "Resource Not Found";
     err.errors = { message: "The requested resource couldn't be found."};
     err.status = 404;
@@ -51,26 +78,6 @@ app.use((err, _req, res, _next) => {
     });
 });
 
-//security middleware
-if (!isProduction) {
-    //enable cors only in development
-    app.use(cors());
-}
-app.use(
-    helmet.crossOriginResourcePolicy({
-        policy: "cross-origin"
-    })
-);
 
-//set the _csurf token and create req.csurfToken method
-app.use(
-    csurf({
-        cookie: {
-            secure: isProduction,
-            sameSite: isProduction && "Lax",
-            httpOnly: true
-        }
-    })
-);
 
 module.exports = app;
