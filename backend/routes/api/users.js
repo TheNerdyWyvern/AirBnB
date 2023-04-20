@@ -51,4 +51,12 @@ router.post(
     }
   );
 
+// router.get('/', async (req, res) => {
+//   if (req.safeUser) {
+//     const users = await User.findAll({
+//       attributes: ['id', 'firstName', 'lastName', 'email']
+//     });
+//   }
+// });
+
 module.exports = router;
