@@ -18,7 +18,7 @@ module.exports = {
       {
         spotId: 2,
         url: 'https://cdn.yep.com/en/assets/static/media/logo-light.b24bd7f574d770d73c99080ca0cfaf2d.svg',
-        preview: true
+        preview: false
       },
       {
         spotId: 3,
