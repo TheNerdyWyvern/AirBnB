@@ -315,6 +315,14 @@ router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) =
     }
 });
 
-router.delete('/:id', )
+router.delete('/:id', requireAuth, verifySpot, async (req, res) => {
+    const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });    
+
+    if (spot.ownerId == req.user.id) {
+        await spot.destroy();
+
+        res.json({ message: "Successfully deleted" });
+    }
+});
 
 module.exports = router;
