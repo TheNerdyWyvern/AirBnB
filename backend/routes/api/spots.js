@@ -22,6 +22,38 @@ const verifySpot = async (req, _res, next) => {
     next();
 }
 
+const validateSpotBody = [
+    check('address')
+      .exists({ checkFalsy: true })
+      .withMessage('Street address is required'),
+    check('city')
+      .exists({ checkFalsy: true })
+      .withMessage('City is required'),
+    check('state')
+      .exists({ checkFalsy: true })
+      .withMessage('State is required'),
+    check('country')
+      .exists({ checkFalsy: true })
+      .withMessage('Country is required'),
+    check('lat')
+      .exists({ checkFalsy: true })
+      .withMessage('Latitude is not valid'),
+    check('lng')
+      .exists({ checkFalsy: true })
+      .withMessage('Longitude is not valid'),
+    check('name')
+      .exists({ checkFalsy: true })
+      .isLength({ max: 50 })
+      .withMessage('Name must be less than 50 characters'),
+    check('description')
+      .exists({ checkFalsy: true })
+      .withMessage('Description is required'),
+    check('price')
+      .exists({ checkFalsy: true })
+      .withMessage('Price per day is required'),
+    handleValidationErrors
+];
+
 const { Op } = require('sequelize');
 
 const router = express.Router();
@@ -140,7 +172,7 @@ router.get('/:id', verifySpot, async (req, res) => {
     }
 
     res.json(spotData);
-})
+});
 
 router.get('/', async (req, res) => {
     const spots = await Spot.findAll({ attributes: { exclude: 'UserId' } });
@@ -209,39 +241,25 @@ router.get('/', async (req, res) => {
     res.json(final);
 });
 
-const validateSpotCreation = [
-    check('address')
-      .exists({ checkFalsy: true })
-      .withMessage('Street address is required'),
-    check('city')
-      .exists({ checkFalsy: true })
-      .withMessage('City is required'),
-    check('state')
-      .exists({ checkFalsy: true })
-      .withMessage('State is required'),
-    check('country')
-      .exists({ checkFalsy: true })
-      .withMessage('Country is required'),
-    check('lat')
-      .exists({ checkFalsy: true })
-      .withMessage('Latitude is not valid'),
-    check('lng')
-      .exists({ checkFalsy: true })
-      .withMessage('Longitude is not valid'),
-    check('name')
-      .exists({ checkFalsy: true })
-      .isLength({ max: 50 })
-      .withMessage('Name must be less than 50 characters'),
-    check('description')
-      .exists({ checkFalsy: true })
-      .withMessage('Description is required'),
-    check('price')
-      .exists({ checkFalsy: true })
-      .withMessage('Price per day is required'),
-    handleValidationErrors
-  ];
+router.post('/:id/images', requireAuth, verifySpot, async (req, res) => {
+    const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });    
 
-router.post('/', requireAuth, validateSpotCreation, async (req, res) => {
+    if (spot.ownerId == req.user.id) {
+        const { url, preview } = req.body;
+
+        const spotImage = await SpotImage.create({ spotId: req.params.id, url, preview });
+
+        const final = {
+            id: spotImage.id,
+            url: spotImage.url,
+            preview: spotImage.preview
+        }
+
+        res.json(final);
+    }
+});
+
+router.post('/', requireAuth, validateSpotBody, async (req, res) => {
     const { address, city, state, country, lat, lng, name, description, price } = req.body;
 
     const spot = await Spot.create({ ownerId: req.user.id, address, city, state, country, lat, lng, name, description, price });
@@ -263,6 +281,40 @@ router.post('/', requireAuth, validateSpotCreation, async (req, res) => {
     };
 
     res.json(final)
-})
+});
+
+router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) => {
+    const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });    
+
+    if (spot.ownerId == req.user.id) {
+        const { address, city, state, country, lat, lng, name, description, price } = req.body;
+
+        const values = { address, city, state, country, lat, lng, name, description, price, updatedAt: new Date() }
+
+        await spot.update(values);
+
+        await spot.save();
+
+        const final = {
+            id: spot.id,
+            ownerId: req.user.id,
+            address: spot.address,
+            city: spot.city,
+            state: spot.state,
+            country: spot.country,
+            lat: spot.lat,
+            lng: spot.lng,
+            name: spot.name,
+            description: spot.description,
+            price: spot.price,
+            createdAt: spot.createdAt,
+            updatedAt: spot.updatedAt
+        };
+    
+        res.json(final)
+    }
+});
+
+router.delete('/:id', )
 
 module.exports = router;
