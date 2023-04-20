@@ -45,7 +45,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      validate: {
+        max: 50
+      }
     },
     description: {
       type: DataTypes.STRING,
@@ -53,15 +56,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     price: {
       type: DataTypes.DECIMAL,
-      allowNull: false,
-      validate: {
-        len: [3,12],
-        hasCents(val) {
-          if (val.toString().split('.')[2].length !== 2) {
-            throw new Error("Must add cents");
-          }
-        }
-      }
+      allowNull: false
     }
   }, {
     sequelize,
