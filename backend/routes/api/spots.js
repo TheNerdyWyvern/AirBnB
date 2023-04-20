@@ -26,8 +26,11 @@ router.get('/', async (req, res) => {
             attributes: ['stars']
         });
 
-        const preview = await spot.getSpotImages({
-            attributes: ['url', 'preview'],
+        const preview = await SpotImage.findAll({
+            where: {
+                spotId: spot.id
+            },
+            attributes: ['url', 'preview']
         });
 
         let sum = 0;
