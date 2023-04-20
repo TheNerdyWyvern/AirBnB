@@ -6,6 +6,21 @@ const sequelize = require('sequelize');
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
 const { Spot, Review, SpotImage, User } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
+const validateSpot = async (req, _res, next) => {
+    const spots = await Spot.findAll({ attributes: { exclude: 'UserId' } });
+
+    const spot = spots.find(spot => spot.id == req.params.id);
+
+    if (!spot) {
+        const err = new Error("Couldn't find a Spot with the specified id");
+        err.title = "Resource Not Found";
+        err.errors = { message: "Spot couldn't be found."};
+        err.status = 404;
+        return next(err);
+    }
+
+    next();
+}
 
 const { Op } = require('sequelize');
 
@@ -79,7 +94,7 @@ router.get('/current', requireAuth, async (req, res) => {
     res.json(final);
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateSpot, async (req, res) => {
     const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });
 
     const stars = await Review.findAll({ 
