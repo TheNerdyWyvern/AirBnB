@@ -4,7 +4,7 @@ const { check } = require('express-validator');
 const sequelize = require('sequelize');
 
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
-const { Spot, Review, SpotImage, User } = require('../../db/models');
+const { Spot, Review, SpotImage, User, ReviewImage } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
 const verifySpot = async (req, _res, next) => {
     const spots = await Spot.findAll();
@@ -21,16 +21,6 @@ const verifySpot = async (req, _res, next) => {
 
     next();
 }
-
-const validateReviewBody = [
-    check('review')
-      .exists({ checkFalsy: true })
-      .withMessage('Review text is required'),
-    check('stars')
-      .exists({ checkFalsy: true })
-      .withMessage('Stars must be an integer from 1 to 5'),
-    handleValidationErrors
-];
 
 const validateSpotBody = [
     check('address')
@@ -61,6 +51,16 @@ const validateSpotBody = [
     check('price')
       .exists({ checkFalsy: true })
       .withMessage('Price per day is required'),
+    handleValidationErrors
+];
+
+const validateReviewBody = [
+    check('review')
+      .exists({ checkFalsy: true })
+      .withMessage('Review text is required'),
+    check('stars')
+      .exists({ checkFalsy: true })
+      .withMessage('Stars must be an integer from 1 to 5'),
     handleValidationErrors
 ];
 
@@ -246,6 +246,38 @@ router.get('/', async (req, res) => {
     res.json(final);
 });
 
+router.get('/:id/reviews', verifySpot, async (req, res) => {
+    const reviews = await Review.findAll({ where: { spotId: req.params.id } });
+
+    const reviewFinal = [];
+
+    for (let r in reviews) {
+        const user = await User.findByPk(r.userId);
+
+        const ReviewImages = await ReviewImage.findAll({ where: { reviewId: r.id } });
+
+        const reviewBody = {
+            id: r.id,
+            userId: r.userId,
+            spotId: r.spotId,
+            review: r.review,
+            stars: r.stars,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
+            User: user,
+            ReviewImages
+        }
+
+        reviewFinal.push(reviewBody);
+    }
+
+    const final = {
+        Reviews: reviewFinal
+    }
+
+    res.json(final);
+});
+
 router.post('/:id/images', requireAuth, verifySpot, async (req, res) => {
     const spot = await Spot.findByPk(req.params.id);    
 
@@ -314,7 +346,7 @@ router.post('/:id/reviews', requireAuth, verifySpot, validateReviewBody, async(r
     }
 
     res.json(final);
-})
+});
 
 router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) => {
     const spot = await Spot.findByPk(req.params.id);    

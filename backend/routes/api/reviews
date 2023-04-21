@@ -4,15 +4,16 @@ const { check } = require('express-validator');
 const { requireAuth } = require('../../utils/auth');
 const { Review, ReviewImage, Spot, User } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
-const verifySpot = async (req, _res, next) => {
-    const spots = await Spot.findAll();
 
-    const spot = spots.find(spot => spot.id == req.params.id);
+const verifyReview = async (req, _res, next) => {
+    const reviews = await Review.findAll();
 
-    if (!spot) {
-        const err = new Error("Couldn't find a Spot with the specified id");
+    const review = reviews.find(review => review.id == req.params.id);
+
+    if (!review) {
+        const err = new Error("Couldn't find a Review with the specified id");
         err.title = "Resource Not Found";
-        err.errors = { message: "Spot couldn't be found."};
+        err.errors = { message: "Review couldn't be found."};
         err.status = 404;
         return next(err);
     }
@@ -22,6 +23,66 @@ const verifySpot = async (req, _res, next) => {
 
 const router = express.Router();
 
-router.post()
+router.get('/current', requireAuth, async (req, res) => {
+    const reviews = await Review.findAll({ where: { userId: req.user.id } });
+
+    const user = await User.findByPk(req.user.id);
+
+    const spot = await Spot.findAll({ where: { ownerId: req.user.id } });
+
+    let reviewFinal = [];
+
+    for (let r of reviews) {
+        const ReviewImages = await ReviewImage.findAll({ where: { reviewId: r.id } });
+
+        const reviewBody = {
+            id: r.id,
+            userId: User.id,
+            spotId: Spot.id,
+            review: r.review,
+            stars: r.stars,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
+            User: user,
+            Spot: spot[0],
+            ReviewImages
+        }
+
+        reviewFinal.push(reviewBody);
+    }
+
+    const final = {
+        Reviews: reviewFinal
+    }
+
+    res.json(final);
+});
+
+router.post(':id/images', requireAuth, verifyReview, async (req, res, next) => {
+    const images = await ReviewImage.findAll({ where: { reviewId: req.params.id } });
+
+    if (images.length >= 10) {
+        const err = new Error("Cannot add any more images because there is a maximum of 10 images per resource");
+        err.title = "Resource has too many images";
+        err.errors = { message: "Maximum number of images for this resource was reached" };
+        err.status = 403;
+        return next(err);
+    }
+
+    const review = await Review.findByPk(req.params.id);
+
+    if (review.userId == req.user.id) {
+        const { url } = req.body;
+
+        const reviewImage = await ReviewImage.create({ reviewId: req.params.id, url });
+
+        const final = {
+            id: reviewImage.id,
+            url: reviewImage.url
+        }
+
+        res.json(final);
+    }
+})
 
 module.exports = router;
