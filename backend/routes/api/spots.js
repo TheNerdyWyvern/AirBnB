@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const { check } = require('express-validator');
 const sequelize = require('sequelize');
 
-const { setTokenCookie, requireAuth } = require('../../utils/auth');
+const { requireAuth } = require('../../utils/auth');
 const { Spot, Review, SpotImage, User, ReviewImage } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
 const verifySpot = async (req, _res, next) => {
@@ -71,7 +71,7 @@ const router = express.Router();
 router.get('/current', requireAuth, async (req, res) => {
     const spots = await Spot.findAll({ where: { ownerId: req.user.id } });
 
-    const payload = [];
+    const spotsFinal = [];
 
     for(let i = 0; i < spots.length; i++) {
         const spot = spots[i];
@@ -103,7 +103,7 @@ router.get('/current', requireAuth, async (req, res) => {
             previewImage = null;
         }
 
-        const spotData = {
+        const spotBody = {
             id: spot.id,
             ownerId: spot.ownerId,
             address: spot.address,
@@ -121,7 +121,7 @@ router.get('/current', requireAuth, async (req, res) => {
             previewImage
         }
 
-        payload.push(spotData);
+        spotsFinal.push(spotBody);
     }
 
     const final = {

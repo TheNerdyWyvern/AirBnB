@@ -4,7 +4,6 @@ const { check } = require('express-validator');
 const { requireAuth } = require('../../utils/auth');
 const { Review, ReviewImage, Spot, User } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
-const { verify } = require('jsonwebtoken');
 
 const verifyReview = async (req, _res, next) => {
     const reviews = await Review.findAll();
@@ -48,8 +47,8 @@ router.get('/current', requireAuth, async (req, res) => {
 
         const reviewBody = {
             id: r.id,
-            userId: User.id,
-            spotId: Spot.id,
+            userId: user.id,
+            spotId: spot.id,
             review: r.review,
             stars: r.stars,
             createdAt: r.createdAt,
@@ -123,7 +122,7 @@ router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, re
 });
 
 router.delete('/:id', requireAuth, verifyReview, async (req, res) => {
-    const review = Review.findByPk(req.params.id);
+    const review = await Review.findByPk(req.params.id);
 
     if (review.userId == req.user.id) {
         await review.destroy();
