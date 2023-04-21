@@ -4,10 +4,10 @@ const { check } = require('express-validator');
 const sequelize = require('sequelize');
 
 const { setTokenCookie, requireAuth } = require('../../utils/auth');
-const { Spot, Review, SpotImage, User } = require('../../db/models');
+const { Spot, Review, SpotImage, User, ReviewImage } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
 const verifySpot = async (req, _res, next) => {
-    const spots = await Spot.findAll({ attributes: { exclude: 'UserId' } });
+    const spots = await Spot.findAll();
 
     const spot = spots.find(spot => spot.id == req.params.id);
 
@@ -54,17 +54,22 @@ const validateSpotBody = [
     handleValidationErrors
 ];
 
+const validateReviewBody = [
+    check('review')
+      .exists({ checkFalsy: true })
+      .withMessage('Review text is required'),
+    check('stars')
+      .exists({ checkFalsy: true })
+      .withMessage('Stars must be an integer from 1 to 5'),
+    handleValidationErrors
+];
+
 const { Op } = require('sequelize');
 
 const router = express.Router();
 
 router.get('/current', requireAuth, async (req, res) => {
-    const spots = await Spot.findAll({ 
-        attributes: { exclude: 'UserId' },
-        where: {
-            ownerId: req.user.id
-        }
-    });
+    const spots = await Spot.findAll({ where: { ownerId: req.user.id } });
 
     const payload = [];
 
@@ -127,7 +132,7 @@ router.get('/current', requireAuth, async (req, res) => {
 });
 
 router.get('/:id', verifySpot, async (req, res) => {
-    const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });
+    const spot = await Spot.findByPk(req.params.id);
 
     const stars = await Review.findAll({ 
         where: {
@@ -175,7 +180,7 @@ router.get('/:id', verifySpot, async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-    const spots = await Spot.findAll({ attributes: { exclude: 'UserId' } });
+    const spots = await Spot.findAll();
 
     const payload = [];
 
@@ -241,8 +246,40 @@ router.get('/', async (req, res) => {
     res.json(final);
 });
 
+router.get('/:id/reviews', verifySpot, async (req, res) => {
+    const reviews = await Review.findAll({ where: { spotId: req.params.id } });
+
+    const reviewFinal = [];
+
+    for (let r in reviews) {
+        const user = await User.findByPk(r.userId);
+
+        const ReviewImages = await ReviewImage.findAll({ where: { reviewId: r.id } });
+
+        const reviewBody = {
+            id: r.id,
+            userId: r.userId,
+            spotId: r.spotId,
+            review: r.review,
+            stars: r.stars,
+            createdAt: r.createdAt,
+            updatedAt: r.updatedAt,
+            User: user,
+            ReviewImages
+        }
+
+        reviewFinal.push(reviewBody);
+    }
+
+    const final = {
+        Reviews: reviewFinal
+    }
+
+    res.json(final);
+});
+
 router.post('/:id/images', requireAuth, verifySpot, async (req, res) => {
-    const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });    
+    const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
         const { url, preview } = req.body;
@@ -283,13 +320,41 @@ router.post('/', requireAuth, validateSpotBody, async (req, res) => {
     res.json(final)
 });
 
+router.post('/:id/reviews', requireAuth, verifySpot, validateReviewBody, async(req, res, next) => {
+    const checkReviews = await Review.findAll({ where: { userId: req.user.id, spotId: req.params.id } });
+
+    if(checkReviews) {
+        const err = new Error("Review from the current user already exists for the Spot");
+        err.title = "Review from user already exists for the Spot";
+        err.errors = { message: "User already has a review for this spot"};
+        err.status = 500;
+        return next(err);
+    }
+    
+    const { review, stars } = req.body;
+
+    const newReview = await Spot.create({ userId: req.user.id, spotId: req.params.id, review, stars });
+
+    const final = {
+        id: newReview.id,
+        userId: newReview.userId,
+        spotId: newReview.spotId,
+        review: newReview.review,
+        stars: newReview.stars,
+        createdAt: newReview.createdAt,
+        updatedAt: newReview.updatedAt
+    }
+
+    res.json(final);
+});
+
 router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) => {
-    const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });    
+    const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
         const { address, city, state, country, lat, lng, name, description, price } = req.body;
 
-        const values = { address, city, state, country, lat, lng, name, description, price, updatedAt: new Date() }
+        const values = { address, city, state, country, lat, lng, name, description, price, updatedAt: new Date() };
 
         await spot.update(values);
 
@@ -316,7 +381,7 @@ router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) =
 });
 
 router.delete('/:id', requireAuth, verifySpot, async (req, res) => {
-    const spot = await Spot.findByPk(req.params.id, { attributes: { exclude: 'UserId' } });    
+    const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
         await spot.destroy();
