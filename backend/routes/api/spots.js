@@ -354,7 +354,7 @@ router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) =
     if (spot.ownerId == req.user.id) {
         const { address, city, state, country, lat, lng, name, description, price } = req.body;
 
-        const values = { address, city, state, country, lat, lng, name, description, price, updatedAt: new Date() }
+        const values = { address, city, state, country, lat, lng, name, description, price, updatedAt: new Date() };
 
         await spot.update(values);
 
