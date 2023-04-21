@@ -1,0 +1,27 @@
+const express = require('express');
+const { check } = require('express-validator');
+
+const { requireAuth } = require('../../utils/auth');
+const { Review, ReviewImage, Spot, User } = require('../../db/models');
+const { handleValidationErrors } = require('../../utils/validation');
+const verifySpot = async (req, _res, next) => {
+    const spots = await Spot.findAll();
+
+    const spot = spots.find(spot => spot.id == req.params.id);
+
+    if (!spot) {
+        const err = new Error("Couldn't find a Spot with the specified id");
+        err.title = "Resource Not Found";
+        err.errors = { message: "Spot couldn't be found."};
+        err.status = 404;
+        return next(err);
+    }
+
+    next();
+}
+
+const router = express.Router();
+
+router.post()
+
+module.exports = router;
