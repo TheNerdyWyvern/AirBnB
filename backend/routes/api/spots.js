@@ -1,7 +1,6 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const { check } = require('express-validator');
-const sequelize = require('sequelize');
+const { Op } = require('sequelize');
 
 const { requireAuth } = require('../../utils/auth');
 const { Spot, Review, SpotImage, User, ReviewImage, Booking } = require('../../db/models');
@@ -64,8 +63,15 @@ const validateReviewBody = [
     handleValidationErrors
 ];
 
-const { Op } = require('sequelize');
-const { verify } = require('jsonwebtoken');
+const validateSpotQueries = [
+    check('review')
+      .exists({ checkFalsy: true })
+      .withMessage('Review text is required'),
+    check('stars')
+      .exists({ checkFalsy: true })
+      .withMessage('Stars must be an integer from 1 to 5'),
+    handleValidationErrors
+];
 
 const router = express.Router();
 
@@ -265,13 +271,101 @@ router.get('/:id', verifySpot, async (req, res) => {
     res.json(spotData);
 });
 
-router.get('/', async (req, res) => {
-    const spots = await Spot.findAll();
+router.get('/', async (req, res, next) => {
+    let errorResult = { errors: {}, count: 0, pageCount: 0 };
+
+    const where = {};
+    const pagination = {};
+
+    let { page, size, minLat, maxLat, minLng, maxLng, minPrice, maxPrice } = req.query;
+
+    page = parseInt(page);
+    size = parseInt(size);
+    minLat = parseFloat(minLat);
+    maxLat = parseFloat(maxLat);
+    minLng = parseFloat(minLng);
+    maxLng = parseFloat(maxLng);
+    minPrice = parseFloat(minPrice);
+    maxPrice = parseFloat(maxPrice);
+
+    if(!page) page = 1;
+    if(!size) size = 20;
+
+    if(page > 10) page = 10;
+    if(size > 20) size = 20;
+
+    if (page < 1 && size < 1) {
+        errorResult.errors.page = "Page must be greater than or equal to 1";
+        errorResult.errors.size = "Size must be greater than or equal to 1";
+    }
+    else if (page < 1) {
+        errorResult.errors.page = "Page must be greater than or equal to 1";
+    }
+    else if (size < 1) {
+        errorResult.errors.size = "Size must be greater than or equal to 1";
+    }
+    else if (Number.isInteger(page) && Number.isInteger(size) &&
+            page >= 1 && size >= 1) {
+        pagination.limit = size;
+        pagination.offset = size * (page - 1);
+    }
+
+    if (maxLat && minLat) {
+        if (maxLat < -90 || maxLat > 90) {
+            errorResult.errors.maxLat = "Maximum latitude is invalid";
+        }
+        if (minLat < -90 || minLat > 90) {
+            errorResult.errors.maxLat = "Minimum latitude is invalid";
+        }
+        if (!errorResult.errors.minLng && !errorResult.errors.maxLng) {
+            where.lat = { [Op.between]: [minLat, maxLat] };
+        }
+    }
+
+    if (maxLng && minLng) {
+        if (maxLng < -180 || maxLng > 180) {
+            errorResult.errors.maxLng = "Maximum longitude is invalid";
+        }
+        if (minLng < -180 || minLng > 180) {
+            errorResult.errors.minLng = "Minimum longitude is invalid";
+        }
+        if (!errorResult.errors.minLng && !errorResult.errors.maxLng) {
+            where.lng = { [Op.between]: [minLng, maxLng] };
+        }
+    }
+
+    if (maxPrice) {
+        if (maxPrice < 0) {
+            errorResult.errors.maxPrice = "Maximum price must be greater than or equal to 0";
+        }
+        if (minPrice < 0) {
+            errorResult.errors.minPrice = "Minimum price must be greater than or equal to 0";
+        }
+        if (!errorResult.errors.minPrice && !errorResult.errors.maxPrice) {
+            where.price = { [Op.between]: [minPrice, maxPrice] };
+        }
+    }
+
+    // where.price = { [Op.between]: [0, 150]};
+
+    if(errorResult.errors.length) {
+        const err = Error("Bad Request");
+        err.errors = errorResult.errors;
+        err.status = 400;
+        err.title = "Query parameter validation errors";
+        return next(err);
+    }
+
+    console.log(where);
+
+    const spots = await Spot.findAll({
+        where,
+        ...pagination
+    });
 
     const spotFinal = [];
 
-    for(let i = 0; i < spots.length; i++) {
-        const spot = spots[i];
+    for(let spot of spots) {
 
         const stars = await Review.findAll({ 
             where: {
