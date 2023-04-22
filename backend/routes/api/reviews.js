@@ -68,7 +68,7 @@ router.get('/current', requireAuth, async (req, res) => {
     res.json(final);
 });
 
-router.post(':id/images', requireAuth, verifyReview, async (req, res, next) => {
+router.post('/:id/images', requireAuth, verifyReview, async (req, res, next) => {
     const images = await ReviewImage.findAll({ where: { reviewId: req.params.id } });
 
     if (images.length >= 10) {
@@ -98,7 +98,7 @@ router.post(':id/images', requireAuth, verifyReview, async (req, res, next) => {
 router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, res) => {
     const oldReview = await Review.findByPk(req.params.id);
 
-    if(review.userId == req.user.id) {
+    if(oldReview.userId == req.user.id) {
         const { review, stars } = req.body;
 
         const values = { review, stars, updatedAt: new Date() };
