@@ -1,9 +1,7 @@
 const express = require('express');
-const { check } = require('express-validator');
 
 const { requireAuth } = require('../../utils/auth');
-const { Review, ReviewImage, Spot, User } = require('../../db/models');
-const { handleValidationErrors } = require('../../utils/validation');
+const { SpotImage } = require('../../db/models');
 
 const verifySpotImage = async (req, _res, next) => {
     const spotImages = await SpotImage.findAll();

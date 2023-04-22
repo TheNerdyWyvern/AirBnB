@@ -2,7 +2,7 @@ const express = require('express');
 const { check } = require('express-validator');
 
 const { requireAuth } = require('../../utils/auth');
-const { Booking, Spot, User } = require('../../db/models');
+const { Booking, Spot } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
 
 const verifyBooking = async (req, _res, next) => {
