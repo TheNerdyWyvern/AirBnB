@@ -129,6 +129,6 @@ router.delete('/:id', requireAuth, verifyReview, async (req, res) => {
 
         res.json({ message: 'Successfully deleted' });
     }
-})
+});
 
 module.exports = router;

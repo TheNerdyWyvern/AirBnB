@@ -442,11 +442,13 @@ router.post('/:id/bookings', requireAuth, verifySpot, async (req, res, next) => 
             errors.endDate = "End date conflicts with an existing booking";
         }
 
-        const err = Error("Sorry, this spot is already booked for the specific dates");
-        err.errors = errors;
-        err.status = 403;
-        err.title = "Booking Conflict";
-        return next(err);
+        if(errors.startDate || errors.endDate) {
+            const err = Error("Sorry, this spot is already booked for the specific dates");
+            err.errors = errors;
+            err.status = 403;
+            err.title = "Booking Conflict";
+            return next(err);
+        }
     }
 
     const spot = await Spot.findByPk(req.params.id);
