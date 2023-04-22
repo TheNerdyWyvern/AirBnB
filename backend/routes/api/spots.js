@@ -360,6 +360,13 @@ router.post('/:id/images', requireAuth, verifySpot, async (req, res) => {
 
         res.json(final);
     }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
 });
 
 router.post('/', requireAuth, validateSpotBody, async (req, res) => {
@@ -415,8 +422,11 @@ router.post('/:id/reviews', requireAuth, verifySpot, validateReviewBody, async(r
 });
 
 router.post('/:id/bookings', requireAuth, verifySpot, async (req, res, next) => {
-    const endDatePlus = new Date((req.body.endDate).toDateString());
-    const startDatePlus = new Date((req.body.startDate).toDateString());
+    const newEndDate = new Date(req.body.endDate);
+    const newStartDate = new Date(req.body.startDate);
+
+    const endDatePlus = new Date(newEndDate.toDateString());
+    const startDatePlus = new Date(newStartDate.toDateString());
 
     if (endDatePlus.getTime() >= startDatePlus.getTime()) {
         const err = Error("Bad request.");
@@ -429,8 +439,11 @@ router.post('/:id/bookings', requireAuth, verifySpot, async (req, res, next) => 
     const bookings = await Booking.findAll({ where: { spotId: req.params.id } });
 
     for (let b in bookings) {
-        const bEndDate = new Date((b.endDate).toDateString());
-        const bStartDate = new Date((b.startDate).toDateString());
+        const bEndDateCheck = new Date(b.endDate);
+        const bStartDateCheck = new Date(b.startDate);
+
+        const bEndDate = new Date(bEndDateCheck.toDateString());
+        const bStartDate = new Date(bStartDateCheck.toDateString());
 
         const errors = {};
 
@@ -470,6 +483,13 @@ router.post('/:id/bookings', requireAuth, verifySpot, async (req, res, next) => 
 
         res.json(final);
     }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
 });
 
 router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) => {
@@ -502,6 +522,13 @@ router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) =
     
         res.json(final)
     }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
 });
 
 router.delete('/:id', requireAuth, verifySpot, async (req, res) => {
@@ -511,6 +538,13 @@ router.delete('/:id', requireAuth, verifySpot, async (req, res) => {
         await spot.destroy();
 
         res.json({ message: "Successfully deleted" });
+    }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
     }
 });
 

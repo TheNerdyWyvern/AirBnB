@@ -65,10 +65,13 @@ router.get('/current', requireAuth, async (req, res) => {
 });
 
 router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
-    const endDatePlus = new Date((req.body.endDate).toDateString());
-    const startDatePlus = new Date((req.body.startDate).toDateString());
+    const newEndDate = new Date(req.body.endDate);
+    const newStartDate = new Date(req.body.startDate);
 
-    if (endDatePlus.getTime() >= startDatePlus.getTime()) {
+    const endDatePlus = new Date(newEndDate.toDateString());
+    const startDatePlus = new Date(newStartDate.toDateString());
+
+    if (endDatePlus.getTime() <= startDatePlus.getTime()) {
         const err = Error("Bad request.");
         err.errors = { "endDate": "endDate cannot be on or before startDate"};
         err.status = 400;
@@ -78,8 +81,11 @@ router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
 
     const booking = await Booking.findByPk(req.params.id)
 
-    const bEndDate = new Date((b.endDate).toDateString());
-    const bStartDate = new Date((b.startDate).toDateString());
+    const newBEndDate = new Date(booking.endDate);
+    const newBStartDate = new Date(booking.startDate);
+
+    const bEndDate = new Date(newBEndDate.toDateString());
+    const bStartDate = new Date(newBEndDate.toDateString());
 
     const errors = {};
 
@@ -98,10 +104,9 @@ router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
         return next(err);
     }
 
-    const bookingCheck = new Date((booking.endDate).toDateString());
     const currentCheck = new Date().toDateString();
 
-    if (currentCheck >= bookingCheck) {
+    if (currentCheck >= bEndDate) {
         const err = Error("Can't edit a booking that's past the end date");
         err.errors = { message: "Past bookings can't be modified"};
         err.status = 403;
@@ -130,12 +135,21 @@ router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
 
         res.json(final);
     }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
 });
 
 router.delete('/:id', requireAuth, async (req, res, next) => {
     const booking = await Booking.findByPk(req.params.id);
 
-    const bookingCheck = new Date((booking.startDate).toDateString());
+    bookingStartDateCheck = new Date(booking.startDate);
+
+    const bookingCheck = new Date(bookingStartDateCheck.toDateString());
     const currentCheck = new Date().toDateString();
 
     if (currentCheck >= bookingCheck) {
@@ -150,6 +164,13 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
         await booking.destroy();
 
         res.json({ message: 'Successfully deleted' });
+    }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
     }
 });
 
