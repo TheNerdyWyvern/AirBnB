@@ -106,7 +106,7 @@ router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, re
     const oldReview = await Review.findByPk(req.params.id);
 
     if(oldReview.userId == req.user.id) {
-        const { review, stars } = req.body;
+        let { review, stars } = req.body;
 
         stars = stars.toFixed();
 

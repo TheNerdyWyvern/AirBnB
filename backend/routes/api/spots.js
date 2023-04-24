@@ -511,7 +511,7 @@ router.post('/:id/reviews', requireAuth, verifySpot, validateReviewBody, async(r
         return next(err);
     }
     
-    const { review, stars } = req.body;
+    let { review, stars } = req.body;
 
     stars = stars.toFixed();
 
