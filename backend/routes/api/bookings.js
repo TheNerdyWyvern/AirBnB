@@ -2,7 +2,7 @@ const express = require('express');
 const { check } = require('express-validator');
 
 const { requireAuth } = require('../../utils/auth');
-const { Booking, Spot, User } = require('../../db/models');
+const { Booking, Spot } = require('../../db/models');
 const { handleValidationErrors } = require('../../utils/validation');
 
 const verifyBooking = async (req, _res, next) => {
@@ -62,6 +62,116 @@ router.get('/current', requireAuth, async (req, res) => {
     };
     
     res.json(final);
+});
+
+router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
+    const newEndDate = new Date(req.body.endDate);
+    const newStartDate = new Date(req.body.startDate);
+
+    const endDatePlus = new Date(newEndDate.toDateString());
+    const startDatePlus = new Date(newStartDate.toDateString());
+
+    if (endDatePlus.getTime() <= startDatePlus.getTime()) {
+        const err = Error("Bad request.");
+        err.errors = { "endDate": "endDate cannot be on or before startDate"};
+        err.status = 400;
+        err.title = "Bad request.";
+        return next(err);
+    }
+
+    const booking = await Booking.findByPk(req.params.id)
+
+    const newBEndDate = new Date(booking.endDate);
+    const newBStartDate = new Date(booking.startDate);
+
+    const bEndDate = new Date(newBEndDate.toDateString());
+    const bStartDate = new Date(newBEndDate.toDateString());
+
+    const errors = {};
+
+    if ((startDatePlus >= bStartDate) && (startDatePlus <= bEndDate)) {
+        errors.startDate = "Start date conflicts with an existing booking";
+    }
+    if ((endDatePlus >= bStartDate) && (endDatePlus <= bEndDate)) {
+        errors.endDate = "End date conflicts with an existing booking";
+    }
+
+    if(errors.startDate || errors.endDate) {
+        const err = Error("Sorry, this spot is already booked for the specific dates");
+        err.errors = errors;
+        err.status = 403;
+        err.title = "Booking Conflict";
+        return next(err);
+    }
+
+    const currentCheck = new Date().toDateString();
+
+    if (currentCheck >= bEndDate) {
+        const err = Error("Can't edit a booking that's past the end date");
+        err.errors = { message: "Past bookings can't be modified"};
+        err.status = 403;
+        err.title = "Past bookings can't be modified";
+        return next(err);
+    }
+
+    if(booking.userId == req.user.id) {
+        const { startDate, endDate } = req.body;
+
+        const values = { startDate, endDate, updatedAt: new Date() };
+
+        await booking.update(values);
+
+        await booking.save();
+
+        const final = {
+            id: booking.id,
+            spotId: booking.spotId,
+            userId: booking.userId,
+            startdDate: booking.startDate,
+            endDate: booking.endDate,
+            createdAt: booking.createdAt,
+            updatedAt: booking.updatedAt
+        }
+
+        res.json(final);
+    }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
+});
+
+router.delete('/:id', requireAuth, async (req, res, next) => {
+    const booking = await Booking.findByPk(req.params.id);
+
+    bookingStartDateCheck = new Date(booking.startDate);
+
+    const bookingCheck = new Date(bookingStartDateCheck.toDateString());
+    const currentCheck = new Date().toDateString();
+
+    if (currentCheck >= bookingCheck) {
+        const err = Error("Bookings that have been started can't be deleted");
+        err.errors = { message: "Bookings that have been started can't be deleted"};
+        err.status = 403;
+        err.title = "Bookings that have been started can't be deleted";
+        return next(err);
+    }
+
+    if (booking.userId == req.user.id) {
+        await booking.destroy();
+
+        res.json({ message: 'Successfully deleted' });
+    }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
 });
 
 module.exports = router;

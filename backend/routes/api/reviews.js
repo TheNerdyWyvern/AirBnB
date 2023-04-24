@@ -93,6 +93,13 @@ router.post('/:id/images', requireAuth, verifyReview, async (req, res, next) => 
 
         res.json(final);
     }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
 });
 
 router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, res) => {
@@ -119,6 +126,13 @@ router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, re
 
         res.json(final);
     }
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
 });
 
 router.delete('/:id', requireAuth, verifyReview, async (req, res) => {
@@ -129,6 +143,13 @@ router.delete('/:id', requireAuth, verifyReview, async (req, res) => {
 
         res.json({ message: 'Successfully deleted' });
     }
-})
+    else {
+        const err = Error("Forbidden");
+        err.errors = { message: "Forbidden"};
+        err.status = 403;
+        err.title = "Forbidden";
+        return next(err);
+    }
+});
 
 module.exports = router;
