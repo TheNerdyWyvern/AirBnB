@@ -310,19 +310,21 @@ router.get('/', async (req, res, next) => {
         pagination.offset = size * (page - 1);
     }
 
-    if (maxLat && minLat) {
+    if (maxLat || minLat) {
         if (maxLat < -90 || maxLat > 90) {
             errorResult.errors.maxLat = "Maximum latitude is invalid";
+            console.log("maxlat error");
         }
         if (minLat < -90 || minLat > 90) {
-            errorResult.errors.maxLat = "Minimum latitude is invalid";
+            errorResult.errors.minLat = "Minimum latitude is invalid";
+            console.log("maxlat error");
         }
-        if (!errorResult.errors.minLng && !errorResult.errors.maxLng) {
+        if (!errorResult.errors.minLat && !errorResult.errors.maxLat) {
             where.lat = { [Op.between]: [minLat, maxLat] };
         }
     }
 
-    if (maxLng && minLng) {
+    if (maxLng || minLng) {
         if (maxLng < -180 || maxLng > 180) {
             errorResult.errors.maxLng = "Maximum longitude is invalid";
         }
@@ -334,7 +336,7 @@ router.get('/', async (req, res, next) => {
         }
     }
 
-    if (maxPrice) {
+    if (maxPrice || minPrice) {
         if (maxPrice < 0) {
             errorResult.errors.maxPrice = "Maximum price must be greater than or equal to 0";
         }
@@ -346,8 +348,6 @@ router.get('/', async (req, res, next) => {
         }
     }
 
-    // where.price = { [Op.between]: [0, 150]};
-
     if(errorResult.errors.length) {
         const err = Error("Bad Request");
         err.errors = errorResult.errors;
@@ -355,8 +355,6 @@ router.get('/', async (req, res, next) => {
         err.title = "Query parameter validation errors";
         return next(err);
     }
-
-    console.log(where);
 
     const spots = await Spot.findAll({
         where,
