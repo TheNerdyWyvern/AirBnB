@@ -460,7 +460,7 @@ router.get('/', async (req, res, next) => {
     res.json(final);
 });
 
-router.post('/:id/images', requireAuth, verifySpot, async (req, res) => {
+router.post('/:id/images', requireAuth, verifySpot, async (req, res, next) => {
     const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
@@ -608,7 +608,7 @@ router.post('/', requireAuth, validateSpotBody, async (req, res) => {
     res.json(final)
 });
 
-router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) => {
+router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res, next) => {
     const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
@@ -647,7 +647,7 @@ router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) =
     }
 });
 
-router.delete('/:id', requireAuth, verifySpot, async (req, res) => {
+router.delete('/:id', requireAuth, verifySpot, async (req, res, next) => {
     const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
