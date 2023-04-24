@@ -320,7 +320,15 @@ router.get('/', async (req, res, next) => {
             console.log("maxlat error");
         }
         if (!errorResult.errors.minLat && !errorResult.errors.maxLat) {
-            where.lat = { [Op.between]: [minLat, maxLat] };
+            if(minLat && !maxLat) {
+                where.lat = { [Op.between]: [minLat, Infinity] };
+            }
+            else if (maxLat && !minLat) {
+                where.lat = { [Op.between]: [-Infinity, maxLat] };
+            }
+            else {
+                where.lat = { [Op.between]: [minLat, maxLat] };
+            }
         }
     }
 
@@ -332,7 +340,15 @@ router.get('/', async (req, res, next) => {
             errorResult.errors.minLng = "Minimum longitude is invalid";
         }
         if (!errorResult.errors.minLng && !errorResult.errors.maxLng) {
-            where.lng = { [Op.between]: [minLng, maxLng] };
+            if(minLng && !maxLng) {
+                where.lng = { [Op.between]: [minLng, Infinity] };
+            }
+            else if (maxLng && !minLng) {
+                where.lng = { [Op.between]: [-Infinity, maxLng] };
+            }
+            else {
+                where.lng = { [Op.between]: [minLng, maxLng] };
+            }
         }
     }
 
@@ -344,7 +360,15 @@ router.get('/', async (req, res, next) => {
             errorResult.errors.minPrice = "Minimum price must be greater than or equal to 0";
         }
         if (!errorResult.errors.minPrice && !errorResult.errors.maxPrice) {
-            where.price = { [Op.between]: [minPrice, maxPrice] };
+            if(minPrice && !maxPrice) {
+                where.price = { [Op.between]: [minPrice, Infinity] };
+            }
+            else if (maxPrice && !minPrice) {
+                where.price = { [Op.between]: [-1, maxPrice] };
+            }
+            else {
+                where.price = { [Op.between]: [minPrice, maxPrice] };
+            }
         }
     }
 
@@ -436,7 +460,7 @@ router.get('/', async (req, res, next) => {
     res.json(final);
 });
 
-router.post('/:id/images', requireAuth, verifySpot, async (req, res) => {
+router.post('/:id/images', requireAuth, verifySpot, async (req, res, next) => {
     const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
@@ -584,7 +608,7 @@ router.post('/', requireAuth, validateSpotBody, async (req, res) => {
     res.json(final)
 });
 
-router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) => {
+router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res, next) => {
     const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {
@@ -623,7 +647,7 @@ router.put('/:id', requireAuth, verifySpot, validateSpotBody, async (req, res) =
     }
 });
 
-router.delete('/:id', requireAuth, verifySpot, async (req, res) => {
+router.delete('/:id', requireAuth, verifySpot, async (req, res, next) => {
     const spot = await Spot.findByPk(req.params.id);    
 
     if (spot.ownerId == req.user.id) {

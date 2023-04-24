@@ -21,7 +21,7 @@ const verifySpotImage = async (req, _res, next) => {
 
 const router = express.Router();
 
-router.delete('/:id', requireAuth, verifySpotImage, async (req, res) => {
+router.delete('/:id', requireAuth, verifySpotImage, async (req, res, next) => {
     const spotImage = await SpotImage.findByPk(req.params.id);
 
     if (spotImage.userId == req.user.id) {

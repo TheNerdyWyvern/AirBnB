@@ -21,7 +21,7 @@ const verifyReviewImage = async (req, _res, next) => {
 
 const router = express.Router();
 
-router.delete('/:id', requireAuth, verifyReviewImage, async (req, res) => {
+router.delete('/:id', requireAuth, verifyReviewImage, async (req, res, next) => {
     const reviewImage = await ReviewImage.findByPk(req.params.id);
 
     if (reviewImage.userId == req.user.id) {

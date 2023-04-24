@@ -102,7 +102,7 @@ router.post('/:id/images', requireAuth, verifyReview, async (req, res, next) => 
     }
 });
 
-router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, res) => {
+router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, res, next) => {
     const oldReview = await Review.findByPk(req.params.id);
 
     if(oldReview.userId == req.user.id) {
@@ -135,7 +135,7 @@ router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, re
     }
 });
 
-router.delete('/:id', requireAuth, verifyReview, async (req, res) => {
+router.delete('/:id', requireAuth, verifyReview, async (req, res, next) => {
     const review = await Review.findByPk(req.params.id);
 
     if (review.userId == req.user.id) {
