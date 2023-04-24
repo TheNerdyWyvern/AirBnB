@@ -104,7 +104,7 @@ router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
         return next(err);
     }
 
-    const currentCheck = new Date().toDateString();
+    const currentCheck = new Date();
 
     if (currentCheck.getTime() >= bEndDate.getTime()) {
         const err = Error("Can't edit a booking that's past the end date");
@@ -144,15 +144,15 @@ router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
     }
 });
 
-router.delete('/:id', requireAuth, async (req, res, next) => {
+router.delete('/:id', requireAuth, verifyBooking, async (req, res, next) => {
     const booking = await Booking.findByPk(req.params.id);
 
     bookingStartDateCheck = new Date(booking.startDate);
 
     const bookingCheck = new Date(bookingStartDateCheck.toDateString());
-    const currentCheck = new Date().toDateString();
+    const currentCheck = new Date();
 
-    if (currentCheck >= bookingCheck) {
+    if (currentCheck.getTime() >= bookingCheck.getTime()) {
         const err = Error("Bookings that have been started can't be deleted");
         err.errors = { message: "Bookings that have been started can't be deleted"};
         err.status = 403;
