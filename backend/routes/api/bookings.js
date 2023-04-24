@@ -85,14 +85,14 @@ router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
     const newBStartDate = new Date(booking.startDate);
 
     const bEndDate = new Date(newBEndDate.toDateString());
-    const bStartDate = new Date(newBEndDate.toDateString());
+    const bStartDate = new Date(newBStartDate.toDateString());
 
     const errors = {};
 
-    if ((startDatePlus >= bStartDate) && (startDatePlus <= bEndDate)) {
+    if ((startDatePlus.getTime() >= bStartDate.getTime()) && (startDatePlus.getTime() <= bEndDate.getTime())) {
         errors.startDate = "Start date conflicts with an existing booking";
     }
-    if ((endDatePlus >= bStartDate) && (endDatePlus <= bEndDate)) {
+    if ((endDatePlus.getTime() >= bStartDate.getTime()) && (endDatePlus.getTime() <= bEndDate.getTime())) {
         errors.endDate = "End date conflicts with an existing booking";
     }
 
@@ -106,7 +106,7 @@ router.put('/:id', requireAuth, verifyBooking, async (req, res, next) => {
 
     const currentCheck = new Date().toDateString();
 
-    if (currentCheck >= bEndDate) {
+    if (currentCheck.getTime() >= bEndDate.getTime()) {
         const err = Error("Can't edit a booking that's past the end date");
         err.errors = { message: "Past bookings can't be modified"};
         err.status = 403;

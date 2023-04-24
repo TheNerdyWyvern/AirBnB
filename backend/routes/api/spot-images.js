@@ -1,7 +1,7 @@
 const express = require('express');
 
 const { requireAuth } = require('../../utils/auth');
-const { SpotImage } = require('../../db/models');
+const { SpotImage, Spot } = require('../../db/models');
 
 const verifySpotImage = async (req, _res, next) => {
     const spotImages = await SpotImage.findAll();
@@ -24,7 +24,9 @@ const router = express.Router();
 router.delete('/:id', requireAuth, verifySpotImage, async (req, res, next) => {
     const spotImage = await SpotImage.findByPk(req.params.id);
 
-    if (spotImage.userId == req.user.id) {
+    const spot = await SpotImage.findByPk(spotImage.spotId)
+
+    if (spot.ownerId == req.user.id) {
         await spotImage.destroy();
 
         res.json({ message: 'Successfully deleted' });

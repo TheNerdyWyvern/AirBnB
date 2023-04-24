@@ -520,7 +520,7 @@ router.post('/:id/bookings', requireAuth, verifySpot, async (req, res, next) => 
     const endDatePlus = new Date(newEndDate.toDateString());
     const startDatePlus = new Date(newStartDate.toDateString());
 
-    if (endDatePlus.getTime() >= startDatePlus.getTime()) {
+    if (endDatePlus.getTime() <= startDatePlus.getTime()) {
         const err = Error("Bad request.");
         err.errors = { "endDate": "endDate cannot be on or before startDate"};
         err.status = 400;
@@ -530,7 +530,7 @@ router.post('/:id/bookings', requireAuth, verifySpot, async (req, res, next) => 
 
     const bookings = await Booking.findAll({ where: { spotId: req.params.id } });
 
-    for (let b in bookings) {
+    for (let b of bookings) {
         const bEndDateCheck = new Date(b.endDate);
         const bStartDateCheck = new Date(b.startDate);
 
@@ -539,11 +539,11 @@ router.post('/:id/bookings', requireAuth, verifySpot, async (req, res, next) => 
 
         const errors = {};
 
-        if ((startDatePlus >= bStartDate) && (startDatePlus <= bEndDate)) {
+        if ((startDatePlus.getTime() <= bStartDate.getTime()) && (startDatePlus.getTime() >= bEndDate.getTime())) {
             errors.startDate = "Start date conflicts with an existing booking";
         }
         
-        if ((endDatePlus >= bStartDate) && (endDatePlus <= bEndDate)) {
+        if ((endDatePlus.getTime() >= bStartDate.getTime()) && (endDatePlus.getTime() <= bEndDate.getTime())) {
             errors.endDate = "End date conflicts with an existing booking";
         }
 
