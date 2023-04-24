@@ -108,6 +108,16 @@ router.put('/:id', requireAuth, verifyReview, validateReviewBody, async (req, re
     if(oldReview.userId == req.user.id) {
         const { review, stars } = req.body;
 
+        stars = stars.toFixed();
+
+        if (stars > 5 || stars < 1) {
+            const err = new Error("Bad Request");
+            err.title = "Bad Request";
+            err.errors = { stars: "Stars must be an integer from 1 to 5"};
+            err.status = 400;
+            return next(err);
+        }
+
         const values = { review, stars, updatedAt: new Date() };
 
         await oldReview.update(values);

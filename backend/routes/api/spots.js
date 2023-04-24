@@ -189,23 +189,38 @@ router.get('/:id/reviews', verifySpot, async (req, res) => {
 router.get('/:id/bookings', requireAuth, verifySpot, async (req, res) => {
     const bookings = await Booking.findAll({ where: { spotId: req.params.id } });
 
+    const spot = await Spot.findByPk(req.params.id);
+
     let bookingFinal = [];
 
-    for(let b of bookings) {
-        const user = await User.findByPk(req.user.id);
+    if (spot.ownerId == req.user.id) {
+        for(let b of bookings) {
+            const user = await User.findByPk(req.user.id);
 
-        const bookingBody = {
-            User: user,
-            id: b.id,
-            spotId: b.spotId,
-            userId: b.userId,
-            startDate: b.startDate,
-            endDate: b.endDate,
-            createdAt: b.createdAt,
-            updatedAt: b.updatedAt
+            const bookingBody = {
+                User: user,
+                id: b.id,
+                spotId: b.spotId,
+                userId: b.userId,
+                startDate: b.startDate,
+                endDate: b.endDate,
+                createdAt: b.createdAt,
+                updatedAt: b.updatedAt
+            }
+
+            bookingFinal.push(bookingBody);
         }
+    }
+    else {
+        for(let b of bookings) {
+            const bookingBody = {
+                spotId: b.spotId,
+                startDate: b.startDate,
+                endDate: b.endDate
+            }
 
-        bookingFinal.push(bookingBody);
+            bookingFinal.push(bookingBody);
+        }
     }
 
     const final = {
@@ -497,6 +512,16 @@ router.post('/:id/reviews', requireAuth, verifySpot, validateReviewBody, async(r
     }
     
     const { review, stars } = req.body;
+
+    stars = stars.toFixed();
+
+    if (stars > 5 || stars < 1) {
+        const err = new Error("Bad Request");
+        err.title = "Bad Request";
+        err.errors = { stars: "Stars must be an integer from 1 to 5"};
+        err.status = 400;
+        return next(err);
+    }
 
     const newReview = await Review.create({ userId: req.user.id, spotId: req.params.id, review, stars });
 
