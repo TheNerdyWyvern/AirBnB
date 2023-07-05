@@ -328,11 +328,11 @@ router.get('/', async (req, res, next) => {
     if (maxLat || minLat) {
         if (maxLat < -90 || maxLat > 90) {
             errorResult.errors.maxLat = "Maximum latitude is invalid";
-            console.log("maxlat error");
+            // console.log("maxlat error");
         }
         if (minLat < -90 || minLat > 90) {
             errorResult.errors.minLat = "Minimum latitude is invalid";
-            console.log("maxlat error");
+            // console.log("maxlat error");
         }
         if (!errorResult.errors.minLat && !errorResult.errors.maxLat) {
             if(minLat && !maxLat) {
