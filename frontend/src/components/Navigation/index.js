@@ -10,7 +10,7 @@ function Navigation({ isLoaded }){
   return (
     <ul>
       <li>
-        <NavLink exact to="/">Home</NavLink>
+        <NavLink exact to="/"><img src="Spade.ico" alt="Home Icon" style={{"object-fit": "cover"}}/></NavLink>
       </li>
       {isLoaded && (
         <li>
