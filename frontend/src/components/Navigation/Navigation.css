@@ -1,0 +1,17 @@
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    font-size: 1.25rem;
+}
+
+#home {
+    padding-right: 70%;
+}
+
+#profileButton {
+    position: absolute;
+    right: 0px;
+    top: 20px;
+}
