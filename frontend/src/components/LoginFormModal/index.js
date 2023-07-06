@@ -21,6 +21,7 @@ function LoginFormModal() {
         if (data && data.errors) {
           setErrors(data.errors);
         }
+        console.log("Login Errors", data.errors);
       });
   };
 
