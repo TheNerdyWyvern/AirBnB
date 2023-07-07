@@ -9,7 +9,7 @@ function Navigation({ isLoaded }){
 
   return (
     <nav>
-      <NavLink id="home" exact to="/"><img src={require("./Spade.png")} alt="Home Icon" style={{"object-fit": "cover"}}/></NavLink>
+      <NavLink id="home" exact to="/"><img src={require("./Spade.png")} alt="Home Icon" style={{"objectFit": "cover"}}/></NavLink>
       <ProfileButton id="profileButton" user={sessionUser} />
     </nav>
   );
