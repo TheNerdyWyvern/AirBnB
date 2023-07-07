@@ -2,12 +2,11 @@ import React, { useEffect } from "react";
 import * as spotActions from "../../store/spots";
 import { useDispatch, useSelector } from "react-redux";
 import "./Home.css";
-import { NavLink } from "react-router-dom/cjs/react-router-dom.min";
-// import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { NavLink, useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const Home = () => {
     const dispatch = useDispatch();
-    // const history = useHistory
+    const history = useHistory();
     const spots = Object.values(useSelector(state => state.spots.allSpots));
     
     useEffect(() => {
@@ -17,7 +16,9 @@ const Home = () => {
     return (
         <div id="all-spot-cards">
             {spots.map(e => (
-                <div class="spot-card" key={e.id}>
+                <div class="spot-card" key={e.id} onClick={() => {
+                    history.push(`/spot/${e.id}`);
+                }}>
                     <div class="image-box">
                         <img class="spot-image"
                         src={e.previewImage}
@@ -25,7 +26,7 @@ const Home = () => {
                     </div>
 
                     <div class="spot-text">
-                        <h3><NavLink class="spot-title" to="/">{e.name}</NavLink></h3>
+                        <h3><NavLink class="spot-title" to={`/spot/${e.id}`}>{e.name}</NavLink></h3>
                         <div class="spot-location-and-rating">
                             <p class="spot-location">{`${e.city}, ${e.state}`}</p>
                             <p class="spot-avg-rating">{e.avgRating || "New"}</p>
