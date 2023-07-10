@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import * as spotActions from "../../store/spots";
 import { useDispatch, useSelector } from "react-redux";
 import "./Home.css";
-import { NavLink, useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -16,22 +16,21 @@ const Home = () => {
     return (
         <div id="all-spot-cards">
             {spots.map(e => (
-                <div class="spot-card" key={e.id} onClick={() => {
-                    history.push(`/spot/${e.id}`);
+                <div className="spot-card pointer" key={e.id} onClick={() => {
+                    history.push(`/spots/${e.id}`);
                 }}>
-                    <div class="image-box">
-                        <img class="spot-image"
+                    <div className="image-box">
+                        <img className="spot-image"
                         src={e.previewImage}
-                        alt={`Spot #${e.id}`}/>
+                        alt={`Spot #${e.id}`} title={e.name}/>
                     </div>
 
-                    <div class="spot-text">
-                        <h3><NavLink class="spot-title" to={`/spot/${e.id}`}>{e.name}</NavLink></h3>
-                        <div class="spot-location-and-rating">
-                            <p class="spot-location">{`${e.city}, ${e.state}`}</p>
-                            <p class="spot-avg-rating">{e.avgRating || "New"}</p>
+                    <div className="spot-text">
+                        <div className="spot-location-and-rating">
+                            <span className="spot-location">{`${e.city}, ${e.state}`}</span>
+                            <span className="spot-avg-rating"><i className="fa fa-star"/>{e.avgRating || "New"}</span>
                         </div>
-                        <p class="spot-cost">{`$${e.price} per night`}</p>
+                        <p className="spot-cost">{`$${e.price} night`}</p>
                     </div>
                 </div>
             ))}

@@ -1,0 +1,19 @@
+#spot-image-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:    '#preview-image .spot-images .spot-images'
+                            '#preview-image .spot-images .spot-images';
+}
+
+#preview-image {
+    object-fit: fill;
+}
+
+.spot-images {
+    object-fit: cover;
+}
+
+.grey-box {
+    background-color: grey;
+}

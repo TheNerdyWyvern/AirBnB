@@ -180,7 +180,7 @@ router.get('/:id/reviews', verifySpot, async (req, res) => {
     }
 
     const final = {
-        Reviews: reviewFinal
+        "Reviews": reviewFinal
     }
 
     res.json(final);
@@ -506,14 +506,12 @@ router.post('/:id/reviews', requireAuth, verifySpot, validateReviewBody, async(r
     if(checkReviews[0]) {
         const err = new Error("Review from the current user already exists for the Spot");
         err.title = "Review from user already exists for the Spot";
-        err.errors = { message: "User already has a review for this spot"};
+        err.errors = { message: "You have already posted a review for this spot"};
         err.status = 500;
         return next(err);
     }
     
     let { review, stars } = req.body;
-
-    stars = stars.toFixed();
 
     if (stars > 5 || stars < 1) {
         const err = new Error("Bad Request");
