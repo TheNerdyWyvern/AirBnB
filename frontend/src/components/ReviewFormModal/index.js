@@ -35,15 +35,6 @@ const ReviewFormModal = (spotId) => {
         )
     }
 
-    // const createStars = () => {
-    //     starsArr = [];
-    //     for (let i = 0; i < 6; i++) {
-    //         starsArr.push(<label>
-    //             <input type="radio" name="stars" 
-    //         </label>)
-    //     }
-    // }
-
     return (
         <>
             <h1>How was your stay?</h1>

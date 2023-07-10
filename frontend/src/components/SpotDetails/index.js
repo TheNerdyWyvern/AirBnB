@@ -3,6 +3,7 @@ import * as spotActions from "../../store/spots";
 import * as reviewActions from "../../store/reviews";
 import OpenModalButton from "../OpenModalButton";
 import ReviewFormModal from "../ReviewFormModal";
+import DeleteReviewModal from "../DeleteReviewModal";
 import { useDispatch, useSelector } from "react-redux";
 import "./SpotDetails.css";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
@@ -26,7 +27,7 @@ const SpotDetails = () => {
         return <></>
     }
 
-    // console.log("in spot details", reviews[0].userId);
+    console.log("in spot details", reviews[0]);
 
     const spotImages = spot.SpotImages;
 
@@ -75,7 +76,7 @@ const SpotDetails = () => {
                     {preview ? <img id="preview-image" src={preview.url} alt="preview"/> : <div id="preview-image grey-box" ></div>}
                     {multiImageDisplay()}
                 </div>
-                <h2 id="host">Hosted By {spot.Owner.firstName} {spot.Owner.lastName}</h2>
+                <h2 id="host">Hosted By {spot.Owner?.firstName} {spot.Owner.lastName}</h2>
                 <span id="buyer-info">
                     <span id="spot-cost">${spot.price} night</span>
                     <span id="spot-reviews"><i className="fa fa-star"/>{spot.avgStarRating || "New"}</span>
@@ -97,9 +98,12 @@ const SpotDetails = () => {
                 {spot.numReviews === 0 ? (sessionUser.id !== spot.Owner.id ? <div id="no-reviews-placeholder">Be the first to post a review!</div>: <></>): 
                 reviews.map(e => (
                     <div className="review-card" key={e.id}>
-                        <div id="review-name">{e.User.firstName}</div>
-                        <div id="review-date">{monthNames[new Date(e.updatedAt).getMonth()]} {new Date(e.updatedAt).getFullYear()}</div>
-                        <p id="review-text">{e.review}</p>
+                        <div className="review-name">{e.User.firstName}</div>
+                        <div className="review-date">{monthNames[new Date(e.updatedAt).getMonth()]} {new Date(e.updatedAt).getFullYear()}</div>
+                        <p className="review-text">{e.review}</p>
+                        {e.User.id === sessionUser.id ? <OpenModalButton 
+                                                        buttonText="Delete"
+                                                        modalComponent={<DeleteReviewModal id={e.id}/>}/>:<></>}
                     </div>
                 ))}
             </div>

@@ -1,0 +1,36 @@
+#all-spot-cards {
+    display: grid;
+    grid-template-columns: 2fr 2fr;
+    grid-template-areas: ".spot-card" ".spot-card";
+    grid-gap: 20px
+}
+
+.spot-card {
+    display: grid;
+    grid-template-rows: 1.5fr;
+    grid-template-areas: "image" "text";
+    border: 20px;
+    box-shadow: 5px;
+}
+
+.spot-image {
+    display: block;
+    width: 100%;
+    max-height: 200px;
+    align-self: center;
+}
+
+.spot-location-and-rating {
+    display: flex;
+    justify-content: space-between;
+}
+
+.spot-text {
+    grid-area: text;
+    align-content: center;
+    margin: 5px 15px;
+}
+
+.spot-cost {
+    text-align: start;
+}

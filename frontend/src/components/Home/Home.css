@@ -21,7 +21,8 @@
 }
 
 .spot-location-and-rating {
-    display: inline-block;
+    display: flex;
+    justify-content: space-between;
 }
 
 .spot-text {

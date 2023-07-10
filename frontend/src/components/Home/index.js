@@ -19,7 +19,7 @@ const Home = () => {
                 <div className="spot-card pointer" key={e.id} onClick={() => {
                     history.push(`/spots/${e.id}`);
                 }}>
-                    <div className="image-box">
+                    <div className="image-box" style={{ borderStyle: "solid", borderWidth: "1px", borderColor: "black" }}>
                         <img className="spot-image"
                         src={e.previewImage}
                         alt={`Spot #${e.id}`} title={e.name}/>

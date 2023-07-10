@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as spotActions from "../../store/spots";
-import { useDispatch } from "react-redux";
-import "./CreateSpot.css";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useDispatch, useSelector } from "react-redux";
+import "./EditSpotForm.css";
+import { useHistory, useParams } from "react-router-dom/cjs/react-router-dom.min";
 
-const CreateSpot = () => {
+const EditSpot = () => {
     const dispatch = useDispatch();
     const history = useHistory();
+    const { id } = useParams();
     const [country, setCountry] = useState("");
     const [address, setAddress] = useState("");
     const [city, setCity] = useState("");
@@ -14,17 +15,30 @@ const CreateSpot = () => {
     const [description, setDescription] = useState("");
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
-    const [preview, setPreview] = useState("");
-    const [image1, setImage1] = useState("");
-    const [image2, setImage2] = useState("");
-    const [image3, setImage3] = useState("");
-    const [image4, setImage4] = useState("");
     const [errors, setErrors] = useState({});
+    const [isLoaded, setIsLoaded] = useState(false)
+    const spot = useSelector(state => state.spots.spotById);
+
+    useEffect(() => {
+        dispatch(spotActions.getSpotById(id))
+            .then(() => setIsLoaded(true));
+    }, [dispatch, id]);
+    
+    useEffect(() => {
+        // console.log("effect 2", spot);
+        setCountry(spot.country);
+        setAddress(spot.address);
+        setCity(spot.city);
+        setState(spot.state);
+        setDescription(spot.description);
+        setName(spot.name);
+        setPrice(spot.price);
+    }, [isLoaded, spot]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setErrors({});
-        return dispatch(spotActions.createSpot({ address, city, state, country, lat: 90, lng: 90, name, description, price}, [{url: preview, preview: true}, {url: image1, preview: false}, {url: image2, preview: false}, {url: image3, preview: false}, {url: image4, preview: false}]))
+        return dispatch(spotActions.editSpot({ id, address, city, state, country, lat: 90, lng: 90, name, description, price }))
             .then(async (data) => {
                 history.push(`/spots/${data.id}`);
             })
@@ -38,7 +52,7 @@ const CreateSpot = () => {
 
     return (
         <div id="create-spot-container">
-            <h1>Create a New Spot</h1>
+            <h1>Update Your Spot</h1>
             <form id="create-spot-form" onSubmit={handleSubmit}>
                 <div id="create-spot-location">
                     <h2>Where's your place located?</h2>
@@ -136,52 +150,10 @@ const CreateSpot = () => {
                     </span>
                     {errors.price && <p className="price-errors">{errors.price}</p>}
                 </div>
-                <div id="create-spot-images">
-                    <h2>Liven up your spot with photos</h2>
-                    <p>Submit a link to at least one photo to publish your spot.</p>
-                    <input
-                        type="url"
-                        value={preview}
-                        className="preview"
-                        onChange={(e) => setPreview(e.target.value)}
-                        placeholder="Preview Image URL"
-                        required
-                    />
-                    {errors.preview && <p className="preview-errors">{errors.preview}</p>}
-                    <input
-                        type="url"
-                        value={image1}
-                        className="image"
-                        onChange={(e) => setImage1(e.target.value)}
-                        placeholder="Image URL"
-                    />
-                    <input
-                        type="url"
-                        value={image2}
-                        className="image"
-                        onChange={(e) => setImage2(e.target.value)}
-                        placeholder="Image URL"
-                    />
-                    <input
-                        type="url"
-                        value={image3}
-                        className="image"
-                        onChange={(e) => setImage3(e.target.value)}
-                        placeholder="Image URL"
-                    />
-                    <input
-                        type="url"
-                        value={image4}
-                        className="image"
-                        onChange={(e) => setImage4(e.target.value)}
-                        placeholder="Image URL"
-                    />
-                    {errors.image && <p className="image-errors">{errors.image}</p>}
-                </div>
-                <button type="submit">Create Spot</button>
+                <button type="submit">Update Your Spot</button>
             </form>
         </div>
     )
 }
 
-export default CreateSpot;
+export default EditSpot;
