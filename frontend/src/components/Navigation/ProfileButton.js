@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from 'react-redux';
+import { useHistory } from "react-router-dom";
 import * as sessionActions from '../../store/session';
-import OpenModalMenuItem from './OpenModalMenuItem';
+import OpenModalButton from '../OpenModalButton';
 import LoginFormModal from '../LoginFormModal';
 import SignupFormModal from '../SignupFormModal';
 
 function ProfileButton({ user }) {
+  const history = useHistory();
   const dispatch = useDispatch();
   const [showMenu, setShowMenu] = useState(false);
   const ulRef = useRef();
+
+  
 
   const openMenu = () => {
     if (showMenu) return;
@@ -17,6 +21,8 @@ function ProfileButton({ user }) {
 
   useEffect(() => {
     if (!showMenu) return;
+
+    // console.log("profile useEffect", ulRef.current);
 
     const closeMenu = (e) => {
       if (!ulRef.current.contains(e.target)) {
@@ -27,43 +33,42 @@ function ProfileButton({ user }) {
     document.addEventListener('click', closeMenu);
 
     return () => document.removeEventListener("click", closeMenu);
-  }, [showMenu]);
+  }, [showMenu, ulRef]);
 
-  const closeMenu = () => setShowMenu(false);
+  const closeMenuA = () => setShowMenu(false);
 
   const logout = (e) => {
     e.preventDefault();
     dispatch(sessionActions.logout());
-    closeMenu();
+    closeMenuA();
+    history.push("/");
   };
-
-  const ulClassName = "profile-dropdown" + (showMenu ? "" : " hidden");
 
   return (
     <>
-      <button onClick={!showMenu?closeMenu:openMenu}>
-        <i className="fas fa-user-circle" />
+      <button className="pointer" onClick={openMenu}>
+        <i className="fas fa-bars"/> <i className="fas fa-user-circle" />
       </button>
-      <ul className={ulClassName} ref={ulRef}>
+      <ul className="profile-dropdown" ref={ulRef} hidden={!showMenu}>
         {user ? (
           <>
-            <li>{user.username}</li>
-            <li>{user.firstName} {user.lastName}</li>
+            <li>Hello, {user.firstName}</li>
             <li>{user.email}</li>
+            <li className="pointer" onClick={() => {history.push("/spots/current"); closeMenuA();}}>Manage Spots</li>
             <li>
-              <button onClick={logout}>Log Out</button>
+              <button className="pointer" onClick={logout}>Log Out</button>
             </li>
           </>
         ) : (
           <>
-            <OpenModalMenuItem
-              itemText="Log In"
-              onItemClick={closeMenu}
+            <OpenModalButton
+              buttonText="Log In"
+              onButtonClick={closeMenuA}
               modalComponent={<LoginFormModal />}
             />
-            <OpenModalMenuItem
-              itemText="Sign Up"
-              onItemClick={closeMenu}
+            <OpenModalButton
+              buttonText="Sign Up"
+              onButtonClick={closeMenuA}
               modalComponent={<SignupFormModal />}
             />
           </>

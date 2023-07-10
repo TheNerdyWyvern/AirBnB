@@ -1,13 +1,12 @@
 nav {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-evenly;
+    justify-content: space-between;
     align-items: center;
     font-size: 1.25rem;
-}
-
-#home {
-    padding-right: 70%;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-bottom: 20px;
 }
 
 #profileButton {

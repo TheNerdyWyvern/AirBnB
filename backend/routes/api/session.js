@@ -43,6 +43,7 @@ router.post('/', validateLogin, async (req, res, next) => {
   
     const safeUser = {
       id: user.id,
+      firstName: user.firstName,
       email: user.email,
       username: user.username,
     };
