@@ -11,11 +11,11 @@ function Navigation({ isLoaded }){
   // console.log("navigation", sessionUser);
 
   return (
-    <nav style={{ borderBottomStyle: "solid", borderBottomWidth: "1px", borderBottomColor: "light grey" }}>
-      <NavLink id="home" exact to="/"><img src={require("./Spade.png")} alt="Home Icon" style={{maxHeight: "64px"}}/></NavLink>
-      <div style={{ display: "flex", flexWrap: "nowrap"}}>
+    <nav className='nav-bar'>
+      <NavLink id="home" exact to="/"><img src={require("./Spade.png")} alt="Home Icon" style={{maxHeight: "40px"}}/><span  id='home-text'>GroundBnB</span></NavLink>
+      <div style={{ display: "flex", flexWrap: "nowrap", alignItems: "center"}}>
         {sessionUser && <div id="create-spot-button" className="pointer" onClick={() => {history.push(`/spots/new`);}}>Create Spot</div>}
-        <div style={{marginLeft: "10px"}}>{isLoaded && <ProfileButton id="profileButton" user={sessionUser} /> }</div>
+        <div style={{marginLeft: "10px"}}>{isLoaded && <ProfileButton id="profile-button" user={sessionUser} /> }</div>
       </div>
     </nav>
   );

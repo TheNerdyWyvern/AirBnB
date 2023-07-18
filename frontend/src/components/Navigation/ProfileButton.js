@@ -5,6 +5,7 @@ import * as sessionActions from '../../store/session';
 import OpenModalButton from '../OpenModalButton';
 import LoginFormModal from '../LoginFormModal';
 import SignupFormModal from '../SignupFormModal';
+import './ProfileButton.css';
 
 function ProfileButton({ user }) {
   const history = useHistory();
@@ -46,8 +47,8 @@ function ProfileButton({ user }) {
 
   return (
     <>
-      <button className="pointer" onClick={openMenu}>
-        <i className="fas fa-bars"/> <i className="fas fa-user-circle" />
+      <button className="pointer profile-button" onClick={openMenu}>
+        <i className="fas fa-bars profile-button-components"/> <i className="fas fa-user-circle profile-button-components" />
       </button>
       <ul className="profile-dropdown" ref={ulRef} hidden={!showMenu}>
         {user ? (
