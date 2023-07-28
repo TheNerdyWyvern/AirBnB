@@ -40,16 +40,18 @@ const SpotDetails = () => {
     const multiImageDisplay = () => {
         let imgArr = [];
 
+        console.log("gamer", spotImages);
+
         if (spotImages.length < 4) {
             let add = 0;
             spotImages.forEach(e => {
                 if (!e.preview){
-                    imgArr.push(<img className="spot-images" src={e.url} key={e.id} alt={e.id}/>);
+                    imgArr.push(<div className="image-container"><img className="spot-images" src={e.url} key={e.id} alt={e.id}/></div>);
                 }
                 else add++;
             });
             for (let i = 0; i < (4-spotImages.length)+add; i++) {
-                imgArr.push(<div className="spot-images grey-box" ></div>);
+                imgArr.push(<div className="image-container"><div className="spot-images grey-box" ></div></div>);
             }
             return imgArr;
         }
@@ -57,7 +59,7 @@ const SpotDetails = () => {
             let add = 0;
             for (let i = 0; i < 4; i++) {
                 if (!spotImages[i].preview) {
-                    imgArr.push(<img className="spot-images" src={spotImages[i+add].url} key={spotImages[i+add].id} alt={spotImages[i+add].id}/>)
+                    imgArr.push(<div className="image-container"><img className="spot-images" src={spotImages[i+add].url} key={spotImages[i+add].id} alt={spotImages[i+add].id}/></div>)
                 }
                 else add++;
             }
@@ -73,7 +75,9 @@ const SpotDetails = () => {
                     <p id="spot-location">{spot.city}, {spot.state}, {spot.country}</p>
                 </div>
                 <div id="spot-image-container">
-                    {preview ? <img id="preview-image" src={preview.url} alt="preview"/> : <div id="preview-image grey-box" ></div>}
+                    <div className="preview-container">
+                        {preview ? <img className="preview-image" src={preview.url} alt="preview"/> : <div id="preview-image grey-box" ></div>}
+                    </div>
                     {multiImageDisplay()}
                 </div>
                 <h2 id="host">Hosted By {spot.Owner?.firstName} {spot.Owner.lastName}</h2>
